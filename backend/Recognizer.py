@@ -6,35 +6,26 @@ from PIL import Image, ImageDraw
 import requests
 import numpy as np
 
-urlImage = "https://www.reidsfurnishings.com/wp-content/uploads/2022/10/hero-bath.jpg"
+url = "https://i5.walmartimages.com/seo/HONBAY-Upholstered-Convertible-Sectional-Sofa-Couch-with-Storage-for-Living-Room-Furniture-Sets-Green_bcfc7256-6f27-4dfd-b9ed-99a4c8930560.e5de50114252156264cd0e35030455b1.jpeg"
+image = Image.open(requests.get(url, stream=True).raw)
 
 # Load object detection model and processor
-detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
 processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50")
+detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
 
-# Load the inpainting model
-inpainting_model = StableDiffusionInpaintPipeline.from_pretrained("stabilityai/stable-diffusion-2-inpainting")
-
-#Open up image
-response = requests.get(urlImage)
-image = Image.open(BytesIO(response.content)).convert("RGB")
+# #Open up image
+# response = requests.get(urlImage)
 
 #Perform the actual object detection
 inputs = processor(images=image, return_tensors="pt")
 outputs = detection_model(**inputs)
 
 target_sizes = torch.tensor([image.size[::-1]])
-results = processor.post_process_object_detection(outputs, target_sizes=target_sizes)[0]
+results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.85)[0] #only keep objects with a 75%
 
-mask = Image.new("L", image.size, 0)  # Black mask with the same size as the image
-draw = ImageDraw.Draw(mask)
-
-for box in results["boxes"]:
-    draw.rectangle(box.tolist(), outline=255, fill=255)
-
-# Perform inpainting
-result = inpainting_model(prompt="A clean room without furniture", init_image=image, mask_image=mask).images[0]
-
-# Save or display the result
-result.save("cleaned_room.png")
-result.show()
+for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
+    box = [round(i, 2) for i in box.tolist()]
+    print(
+            f"Detected {detection_model.config.id2label[label.item()]} with confidence "
+            f"{round(score.item(), 3)} at location {box}"
+    )
