@@ -24,6 +24,11 @@ export default {
             'padding': '0 2.5rem',
             'font-size': '1.125rem', /* 18px */
             'line-height': '1.75rem', /* 28px */
+          },
+          ".btn-secondary": {
+            'background-color': '#fff',
+            'color': '#474747',
+            'border': '1px solid #cdcdcd',
           }
         }
       }
