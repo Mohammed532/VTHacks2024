@@ -9,5 +9,14 @@ export default {
   plugins: [
     require('daisyui'),
   ],
+  daisyui: {
+    themes: [
+      {
+        bumblebee: {
+          ...require("daisyui/src/theming/themes")["bumblebee"],
+        },
+      },
+    ],
+  },
 }
 
