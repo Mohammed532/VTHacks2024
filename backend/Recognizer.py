@@ -1,9 +1,8 @@
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import requests
 import numpy as np
 import torch
 from transformers import DetrImageProcessor, DetrForObjectDetection
-from PIL import ImageFilter
 import replicate
 import base64
 
