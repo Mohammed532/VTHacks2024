@@ -1,3 +1,4 @@
 import useURLFile from "./useURLFile"
+import useZip from "./useZip"
 
-export { useURLFile }
+export { useURLFile, useZip }
