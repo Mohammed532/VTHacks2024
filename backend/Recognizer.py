@@ -6,7 +6,11 @@ from transformers import DetrImageProcessor, DetrForObjectDetection
 from PIL import ImageFilter
 
 import replicate
+import base64
 
+file_name = 'object_mask.png'
+
+image_url = "https://www.furniturestorelosangeles.com/media/catalog/product/cache/b9a5bb227f7b0b98d739db40c623248a/n/o/norwood-rustic-grey-bedroom-set.jpg"
 
 # Load the image
 url = "https://www.furniturestorelosangeles.com/media/catalog/product/cache/b9a5bb227f7b0b98d739db40c623248a/n/o/norwood-rustic-grey-bedroom-set.jpg"
@@ -38,13 +42,41 @@ mask.show()  # Show the mask to verify
 # Save the mask
 mask.save("object_mask.png")  #THIS IMAGE NEEDS TO BE SAVED IN S3 BUCKET
 
-output = replicate.run(
-    "zylim0702/remove-object:0e3a841c913f597c1e4c321560aa69e2bc1f15c65f8c366caafc379240efd8ba",
-    input={
-        "mask": "object_mask.png", 
-        "image": url
-    }
-)
+def create_data_uri(file_path):
+    with open(file_path, "rb") as file:
+        # Read the file's contents
+        file_data = file.read()
+        # Encode the file data to base64
+        encoded_data = base64.b64encode(file_data).decode('utf-8')
+        # Construct the data URI
+        data_uri = f"data:application/octet-stream;base64,{encoded_data}"
+        return data_uri
 
-output.show()
-output.show("finalize_output.png")
+
+def run_remover(mask_uri):
+    output = replicate.run(
+        "zylim0702/remove-object:0e3a841c913f597c1e4c321560aa69e2bc1f15c65f8c366caafc379240efd8ba",
+        input={
+            "mask": mask_uri, 
+            "image": image_url
+        }
+    )
+    print(output)
+
+
+def check_url_validity(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        print("URL is accessible.")
+    else:
+        print(f"Failed to access URL. Status code: {response.status_code}")
+
+def main(): 
+    image = load_image(image_url)
+    objects_detected = perform_detection(image)   
+    create_mask(image, objects_detected) 
+    mask_uri = create_data_uri("object_mask.png")
+    run_remover(mask_uri) 
+    
+if __name__ == "__main__":
+    main()
