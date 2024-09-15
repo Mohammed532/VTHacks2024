@@ -4,9 +4,20 @@
 
 :root {
   /* Font Optimization */
-  font-family: Poppins, Arial, sans-serif;
+  font-family: "Poppins", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Color scheme */
+  --cs-primary: '#ff850f';
+  --cs-secondary: '#cdcdcd';
+  --cs-neutral: '#e5e4e4';
+  --cs-background: '#fff';
+  --cs-text: '#474747';
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  color: var(--cs-text);
 }
