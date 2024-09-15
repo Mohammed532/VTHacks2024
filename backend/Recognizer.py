@@ -28,7 +28,7 @@ def perform_detection(image):
     inputs = processor(images=image, return_tensors="pt")
     outputs = detection_model(**inputs)
     target_sizes = torch.tensor([image.size[::-1]])
-    results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.70)[0]  # Lowered threshold
+    results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.65)[0]  # Lowered threshold
     return results
 
 def create_mask(image, results):
@@ -67,6 +67,7 @@ def run_remover(mask_uri):
     )
     print(output)
 
+#optional debugging method 
 def check_url_validity(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -75,12 +76,11 @@ def check_url_validity(url):
         print(f"Failed to access URL. Status code: {response.status_code}")
 
 def main(): 
-    image = load_image(image_url)
+    image = load_image(image_url) #through url 
     objects_detected = perform_detection(image)   
     create_mask(image, objects_detected) 
     mask_uri = create_data_uri("object_mask.png")
-    run_remover(mask_uri) 
+    run_remover(mask_uri)  # will pop out a url
     
 if __name__ == "__main__":
     main()
-
