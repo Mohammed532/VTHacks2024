@@ -1,16 +1,19 @@
 import { Header, FileDrawer } from './../../ui'
 import { ChangeEventHandler, MouseEventHandler, useState } from 'react'
 import { useURLFile, useZip } from '../../hooks'
+import axios from 'axios'
 
 export default function Home(){
     const [clutteredImgs, setClutteredImgs] = useState<string[]>([]);
+    const [clutterdRaw, setClutteredRaw] = useState<FileList | null>(null);
     const [declutterdImgs, setDeclutteredImgs] = useState<string[]>([]);
     const [declutterdRaw, setDeclutteredRaw] = useState<FileList | File[] | null>(null);
     const [file, pending, err] = useURLFile('https://replicate.delivery/pbxt/2gkSoW0o7ALGDdPiipfmBbwlyJzSZMElBWtXked5AQ0KNCdTA/remove_anthing.png', 'test')
     const createZipFn = useZip('file');
     
     let onClitterImgUpdate: ChangeEventHandler<HTMLInputElement> = (e) => {
-        let files = e.target.files
+        let files = e.target.files;
+        setClutteredRaw(files);
         let img_urls: string[] = [];
         if(files){
             for(let i = 0; i < files.length; i++){
@@ -23,6 +26,23 @@ export default function Home(){
 
     let generateDeclutteredImgs: MouseEventHandler<HTMLButtonElement> = (e) => {
         let img_urls: string[] = [];
+        const data = new FormData();
+        
+        if(clutterdRaw){
+            for(let i = 0; i < clutterdRaw.length; i++){
+                data.append('files', clutterdRaw.item(i) as File);
+            }
+        }
+        
+        axios.post('http://127.0.0.1:5000/upload', data)
+          .then(res => {
+            // TODO: implement 
+          })
+          .catch(err => {
+            console.log(err);
+          })
+
+
         if(!pending){
             setDeclutteredRaw([file as File])
             img_urls.push(URL.createObjectURL(file as File))
